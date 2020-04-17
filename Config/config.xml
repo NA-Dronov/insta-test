@@ -1,0 +1,23 @@
+<config>
+    <params>
+        <param name="hostname">localhost</param>
+        <param name="dbname">insta</param>
+        <param name="login">root</param>
+        <param name="password">root</param>
+    </params>
+    <queries>
+        <query>DROP TABLE IF EXISTS currency;</query>
+        <query>
+        CREATE TABLE currency (
+            currency_id int(11) NOT NULL AUTO_INCREMENT,
+            valuteID varchar(10) NOT NULL,
+            numCode char(3) NOT NULL,
+            charCode char(3) NOT NULL,
+            name varchar(64) Not NULL,
+            value decimal(15,4) NOT NULL,
+            date int(11) NOT NULL,
+            CONSTRAINT currencies_pk PRIMARY KEY (currency_id)
+        );
+        </query>
+    </queries>
+</config>

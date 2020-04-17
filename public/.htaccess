@@ -1,0 +1,26 @@
+RewriteEngine On
+
+# If you decide to run your app from the domain root, then strip out "myApp/"
+
+#RewriteBase /myApp/
+
+# First, trim all trailing slashes.
+
+RewriteRule ^(.*)/$ $1 [R=301,L]
+
+# Next, prevent access to URIs starting with index.php.
+# Note: I generally recommend that you leave this out and let
+#       your app handle redirects from index.php.
+
+#RewriteCond %{THE_REQUEST} /index\.php(?:.*) HTTP/1.1 [NC]
+#RewriteRule ^ - [R=404,L]
+
+# Lastly, pipe requests that do not match existing files to index.php.
+# This can be done in several ways, including the one you tried.
+# Uncomment the one the works best for you.
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^ index.php [L]
+# RewriteRule ^(.*)$ index.php/$1 [L]
+RewriteRule ^(.*)$ index.php?request=$1 [QSA,L]
