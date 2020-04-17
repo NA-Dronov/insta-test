@@ -221,7 +221,8 @@ class DatabaseOperator
         $pages_count = $per_page == 0 ? 1 : round($count_result / $per_page, 0);
         $params['total'] = $pages_count;
         if (!empty($params['page']) || !empty($params['per_page'])) {
-            $params['page'] = empty($params['page']) ? 1 : $params['page'] > $pages_count ? $pages_count : $params['page'] < 1 ? 1 : $params['page'];
+            $params['page'] = $params['page'] ?? 0;
+            $params['page'] = empty($params['page']) ? 1 : ($params['page'] > $pages_count ? $pages_count : ($params['page'] < 1 ? 1 : ($params['page'])));
         }
 
         list($sql, $sql_data) = $operation($data, $table_name, $primary_key_column, $params);
