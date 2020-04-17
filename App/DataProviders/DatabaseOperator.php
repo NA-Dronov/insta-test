@@ -163,7 +163,12 @@ class DatabaseOperator
             $sql_data['item_to'] = ['v' => $params['per_page'], 't' => PDO::PARAM_INT];
         }
 
-        $sql = "SELECT {$fields} FROM {$table_name} WHERE 1 {$condition} {$limit}";
+        if (!empty($params['sort_by'])) {
+            $order = " ORDER BY {$params['sort_by']}";
+            $order .= !empty($params['sort_order']) && in_array($params['sort_order'], ['ASC', 'DESC']) ? " {$params['sort_order']}" : " DESC";
+        }
+
+        $sql = "SELECT {$fields} FROM {$table_name} WHERE 1 {$condition} {$order} {$limit}";
         return [$sql, $sql_data];
     }
 

@@ -17,7 +17,9 @@ class HomeCommand extends GetCommand
     protected function processRequest()
     {
         $params = [
-            'per_page' => 25
+            'per_page' => 25,
+            'sort_by' => 'name',
+            'sort_order' => 'ASC',
         ];
 
         if (!empty($_GET['page'])) {
