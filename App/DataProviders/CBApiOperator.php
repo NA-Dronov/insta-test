@@ -4,6 +4,7 @@ namespace App\DataProviders;
 
 use DateTime;
 use App\Core\TSingleton;
+use DateInterval;
 
 class CBApiOperator
 {
@@ -41,8 +42,11 @@ class CBApiOperator
         return  $currency_list;
     }
 
-    protected function dynamic(DateTime $date_from, DateTime $date_to, string $valuta_id)
+    protected function dynamic(DateTime $start_date, DateTime $end_date, string $valuta_id)
     {
+        $date_from = clone $start_date;
+        $date_to = clone $end_date;
+
         $params = [
             'date_req1' => $date_from->format('d/m/Y'),
             'date_req2' => $date_to->format('d/m/Y'),
@@ -60,12 +64,27 @@ class CBApiOperator
 
         $res = $this->fetch($url);
 
-        $dynamic_list = [];
+        $date_from->setTime(0, 0);
+        $date_to->setTime(0, 0);
 
+        $stamp_current = $date_from->getTimestamp();
+        $stamp_end = $date_to->getTimestamp();
+        $keys = [];
+        while ($stamp_current <= $stamp_end) {
+            $keys[$stamp_current] = $stamp_current;
+            $date_from->add(new DateInterval('P1D'));
+            $stamp_current = $date_from->getTimestamp();
+        }
+
+        $dynamic_list = [];
         foreach ($res as $key => $valuta) {
             $ID = (string) $valuta->attributes()['Id'] ?? '';
             if (empty($ID)) {
                 continue;
+            }
+
+            if (!isset($dynamic_list[$ID])) {
+                $dynamic_list[$ID] = $keys;
             }
 
             $date = DateTime::createFromFormat('d.m.Y', $valuta->attributes()['Date'] ?? '');
@@ -76,10 +95,30 @@ class CBApiOperator
 
             $date->setTime(0, 0);
 
-            $dynamic_list[$ID][] = [
+            $dynamic_list[$ID][$date->getTimestamp()] = [
                 'date' =>  $date->getTimestamp(),
                 'Value' => (string) $valuta->Value
             ];
+        }
+
+        if (!empty($dynamic_list)) {
+            foreach ($dynamic_list as $_ID => $_list) {
+                $prev_value = null;
+                array_walk($dynamic_list[$_ID], function (&$v, $k) use (&$prev_value) {
+                    if (!is_array($v) && isset($prev_value)) {
+                        $v = [
+                            'date' => $v,
+                            'Value' => $prev_value['Value']
+                        ];
+                    }
+
+                    $prev_value = $v;
+                });
+
+                $dynamic_list[$_ID] = array_filter($dynamic_list[$_ID], function ($v) {
+                    return is_array($v);
+                });
+            }
         }
 
         return $dynamic_list;

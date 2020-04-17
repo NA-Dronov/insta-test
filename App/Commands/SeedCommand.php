@@ -10,6 +10,7 @@ use App\Core\TViewable;
 use App\DataProviders\CBApiOperator;
 use App\DataProviders\DatabaseOperator;
 use App\Models\Currency;
+use DateInterval;
 
 class SeedCommand extends GetCommand
 {
@@ -31,7 +32,7 @@ class SeedCommand extends GetCommand
 
             $current_date = new DateTime();
             $start_date = new DateTime();
-            $start_date->modify('-1 month');
+            $start_date->sub(new DateInterval('P29D'));
 
             /**
              * @var Currency $value 
@@ -47,7 +48,7 @@ class SeedCommand extends GetCommand
                     $date = new DateTime();
 
                     if (empty($valutes_insert_data[$valuta_id])) {
-                        $daily = CBApiOperator::daily($date->setTimestamp($dynamic_list[$valuta_id][0]['date']));
+                        $daily = CBApiOperator::daily($date->setTimestamp(reset($dynamic_list[$valuta_id])['date']));
 
                         foreach ($daily as $id => $data) {
                             if (empty($valutes_insert_data[$id])) {
