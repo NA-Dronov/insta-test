@@ -186,13 +186,14 @@ class DatabaseOperator
 
         $stmt = $this->pdo->prepare($sql);
 
-        foreach ($data as $field_name => $field_value) {
-            if (is_array($field_value)) {
-                $stmt->bindParam(":{$field_name}", $field_value['v'], $field_value['t']);
+        array_walk($data, function ($v, $k) use ($stmt) {
+            if (is_array($v)) {
+                $stmt->bindParam(":{$k}", $v['v'], $v['t']);
             } else {
-                $stmt->bindParam(":{$field_name}", $field_value);
+                $val = $v;
+                $stmt->bindParam(":{$k}", $val, PDO::PARAM_STR);
             }
-        }
+        });
 
         $stmt->execute();
     }
